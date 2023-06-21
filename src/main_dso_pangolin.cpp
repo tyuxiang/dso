@@ -69,6 +69,10 @@ bool useSampleOutput=false;
 int mode=0;
 
 bool firstRosSpin=false;
+std::string name="";
+std::string data_path = "/home/marvl/Implementation/testing-suite/Results/dso/oxford/10-29/raw_output/";
+std::string output_path = "";
+std::string ts_path = "";
 
 using namespace dso;
 
@@ -251,6 +255,23 @@ void parseArgument(char* arg)
 		}
 		return;
 	}
+
+	// Additional parameters start
+	if(1==sscanf(arg,"experiment=%s",buf))
+	{
+		name = buf;
+		output_path = data_path + name;
+		printf("NAME OF EXPERIMENT IS %s!\n", name.c_str());
+		return;
+	}
+	if(1==sscanf(arg,"ts_path=%s",buf))
+	{
+		ts_path = buf;
+		printf("PATH OF TIMESTAMP IS %s!\n", ts_path.c_str());
+		return;
+	}
+	// Additional parameters end
+
 	if(1==sscanf(arg,"start=%d",&option))
 	{
 		start = option;
@@ -361,7 +382,7 @@ int main( int argc, char** argv )
 	boost::thread exThread = boost::thread(exitThread);
 
 
-	ImageFolderReader* reader = new ImageFolderReader(source,calib, gammaCalib, vignette);
+	ImageFolderReader* reader = new ImageFolderReader(source,calib, gammaCalib, vignette, ts_path);
 	reader->setGlobalCalibration();
 
 
@@ -530,8 +551,7 @@ int main( int argc, char** argv )
         struct timeval tv_end;
         gettimeofday(&tv_end, NULL);
 
-
-        fullSystem->printResult("result.txt");
+		fullSystem->printResult(output_path);
 
 
         int numFramesProcessed = abs(idsToPlay[0]-idsToPlay.back());

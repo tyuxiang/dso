@@ -102,7 +102,7 @@ struct PrepImageItem
 class ImageFolderReader
 {
 public:
-	ImageFolderReader(std::string path, std::string calibFile, std::string gammaFile, std::string vignetteFile)
+	ImageFolderReader(std::string path, std::string calibFile, std::string gammaFile, std::string vignetteFile, std::string ts_path)
 	{
 		this->path = path;
 		this->calibfile = calibFile;
@@ -160,7 +160,12 @@ public:
 
 
 		// load timestamps if possible.
-		loadTimestamps();
+		if (ts_path.empty()){
+			loadTimestamps();
+		}
+		else{
+			loadTimestamps(ts_path);
+		}
 		printf("ImageFolderReader: got %d files in %s!\n", (int)files.size(), path.c_str());
 
 	}
@@ -296,6 +301,7 @@ private:
 		std::ifstream tr;
 		std::string timesFile = path.substr(0,path.find_last_of('/')) + "/times.txt";
 		tr.open(timesFile.c_str());
+		std::cout << timesFile.c_str() << std::endl;
 		while(!tr.eof() && tr.good())
 		{
 			std::string line;
@@ -311,11 +317,86 @@ private:
 				timestamps.push_back(stamp);
 				exposures.push_back(exposure);
 			}
-
+			else if(1 == sscanf(buf, "%lf", &stamp))
+			{
+				timestamps.push_back(stamp);
+				exposures.push_back(exposure);
+			}
 			else if(2 == sscanf(buf, "%d %lf", &id, &stamp))
 			{
 				timestamps.push_back(stamp);
 				exposures.push_back(exposure);
+				break;
+			}
+		}
+		tr.close();
+
+		// check if exposures are correct, (possibly skip)
+		bool exposuresGood = ((int)exposures.size()==(int)getNumImages()) ;
+		for(int i=0;i<(int)exposures.size();i++)
+		{
+			if(exposures[i] == 0)
+			{
+				// fix!
+				float sum=0,num=0;
+				if(i>0 && exposures[i-1] > 0) {sum += exposures[i-1]; num++;}
+				if(i+1<(int)exposures.size() && exposures[i+1] > 0) {sum += exposures[i+1]; num++;}
+
+				if(num>0)
+					exposures[i] = sum/num;
+			}
+
+			if(exposures[i] == 0) exposuresGood=false;
+		}
+
+
+		if((int)getNumImages() != (int)timestamps.size())
+		{
+			printf("set timestamps and exposures to zero!\n");
+			exposures.clear();
+			timestamps.clear();
+		}
+
+		if((int)getNumImages() != (int)exposures.size() || !exposuresGood)
+		{
+			printf("set EXPOSURES to zero!\n");
+			exposures.clear();
+		}
+
+		printf("got %d images and %d timestamps and %d exposures.!\n", (int)getNumImages(), (int)timestamps.size(), (int)exposures.size());
+	}
+
+	inline void loadTimestamps(std::string timesFile)
+	{
+		std::ifstream tr;
+		// std::string timesFile = path.substr(0,path.find_last_of('/')) + "/times.txt";
+		tr.open(timesFile.c_str());
+		std::cout << timesFile.c_str() << std::endl;
+		while(!tr.eof() && tr.good())
+		{
+			std::string line;
+			char buf[1000];
+			tr.getline(buf, 1000);
+
+			int id;
+			double stamp;
+			float exposure = 0;
+
+			if(3 == sscanf(buf, "%d %lf %f", &id, &stamp, &exposure))
+			{
+				timestamps.push_back(stamp);
+				exposures.push_back(exposure);
+			}
+			else if(1 == sscanf(buf, "%lf", &stamp))
+			{
+				timestamps.push_back(stamp);
+				exposures.push_back(exposure);
+			}
+			else if(2 == sscanf(buf, "%d %lf", &id, &stamp))
+			{
+				timestamps.push_back(stamp);
+				exposures.push_back(exposure);
+				break;
 			}
 		}
 		tr.close();
