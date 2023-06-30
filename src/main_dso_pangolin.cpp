@@ -69,8 +69,6 @@ bool useSampleOutput=false;
 int mode=0;
 
 bool firstRosSpin=false;
-std::string name="";
-std::string data_path = "/home/marvl/Implementation/testing-suite/Results/dso/oxford/10-29/raw_output/";
 std::string output_path = "";
 std::string ts_path = "";
 
@@ -259,9 +257,8 @@ void parseArgument(char* arg)
 	// Additional parameters start
 	if(1==sscanf(arg,"experiment=%s",buf))
 	{
-		name = buf;
-		output_path = data_path + name;
-		printf("NAME OF EXPERIMENT IS %s!\n", name.c_str());
+		output_path = buf;
+		printf("NAME OF EXPERIMENT IS %s!\n", output_path.c_str());
 		return;
 	}
 	if(1==sscanf(arg,"ts_path=%s",buf))
