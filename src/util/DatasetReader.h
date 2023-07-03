@@ -301,7 +301,7 @@ private:
 		std::ifstream tr;
 		std::string timesFile = path.substr(0,path.find_last_of('/')) + "/times.txt";
 		tr.open(timesFile.c_str());
-		std::cout << timesFile.c_str() << std::endl;
+		// std::cout << timesFile.c_str() << std::endl;
 		while(!tr.eof() && tr.good())
 		{
 			std::string line;
@@ -371,6 +371,7 @@ private:
 		std::ifstream tr;
 		// std::string timesFile = path.substr(0,path.find_last_of('/')) + "/times.txt";
 		tr.open(timesFile.c_str());
+		std::cout << "TEST" << std::endl;
 		std::cout << timesFile.c_str() << std::endl;
 		while(!tr.eof() && tr.good())
 		{
@@ -396,7 +397,6 @@ private:
 			{
 				timestamps.push_back(stamp);
 				exposures.push_back(exposure);
-				break;
 			}
 		}
 		tr.close();
