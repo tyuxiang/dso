@@ -369,9 +369,7 @@ private:
 	inline void loadTimestamps(std::string timesFile)
 	{
 		std::ifstream tr;
-		// std::string timesFile = path.substr(0,path.find_last_of('/')) + "/times.txt";
 		tr.open(timesFile.c_str());
-		std::cout << "TEST" << std::endl;
 		std::cout << timesFile.c_str() << std::endl;
 		while(!tr.eof() && tr.good())
 		{
